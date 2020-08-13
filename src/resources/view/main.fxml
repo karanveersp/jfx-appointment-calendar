@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="mainBorderPane" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.MainController">
+   <center>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </center>
+   <left>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #223344;" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="CENTER" layoutX="26.0" layoutY="96.0" prefHeight="300.0" prefWidth="150.0" spacing="30.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#toAppointments" text="Appointments" />
+                  <Button mnemonicParsing="false" onAction="#toCustomers" text="Customers" />
+                      <Button mnemonicParsing="false" onAction="#logoutUser" prefHeight="26.0" prefWidth="89.0" text="Logout" />
+               </children>
+            </VBox>
+         </children>
+      </AnchorPane>
+   </left>
+</BorderPane>
