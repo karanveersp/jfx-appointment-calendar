@@ -6,6 +6,6 @@
 
 <AnchorPane prefHeight="600.0" prefWidth="500.0" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.HomeController">
    <children>
-      <Label layoutX="220.0" layoutY="236.0" text="Welcome" />
+      <Label fx:id="welcomeLabel" layoutX="220.0" layoutY="236.0" text="Welcome" AnchorPane.leftAnchor="220.0" AnchorPane.topAnchor="236.0" />
    </children>
 </AnchorPane>

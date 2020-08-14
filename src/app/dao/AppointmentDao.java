@@ -99,15 +99,15 @@ public class AppointmentDao extends BaseDao<Appointment> {
     @Override
     public Appointment insert(Appointment addition) {
         try {
-            addition.setAppointmentId(Util.getNextAvailableId(db, "addressId", "address"));
+            addition.setAppointmentId(Util.getNextAvailableId(db, idColName, tableName));
             String sql = String.format("INSERT INTO %s VALUES (%s)",
                 tableName, insertValuesString(addition)
             );
-            logger.debug("Inserting customer SQL: {}", sql);
+            logger.debug("Inserting appointment SQL: {}", sql);
             db.update(sql);
             return addition;
         } catch (SQLException e) {
-            logger.error("While inserting customer", e);
+            logger.error("While inserting appointment", e);
         }
         return null;
     }

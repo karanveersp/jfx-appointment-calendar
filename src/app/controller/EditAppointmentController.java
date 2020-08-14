@@ -5,6 +5,8 @@ import app.Util;
 import app.model.Appointment;
 import app.model.Customer;
 import app.model.User;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -16,9 +18,9 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class EditAppointmentController implements Initializable {
     private static final Logger logger = LoggerFactory.getLogger(EditAppointmentController.class);
@@ -26,6 +28,17 @@ public class EditAppointmentController implements Initializable {
     public static Appointment selected;
     public static Stage self;
     public static boolean isAddContext;
+
+    private final ObservableList<String> hours = FXCollections.observableArrayList(
+        IntStream.range(0, 24)
+            .boxed()
+            .map(i -> {
+                if (i <= 9) {
+                    return "0" + i;
+                }
+                return String.valueOf(i);
+            }).collect(Collectors.toList()));
+    private final ObservableList<String> minutes = FXCollections.observableArrayList("00", "15", "30", "45");
 
     @FXML
     private ComboBox<Customer> customerDropdown;
@@ -40,10 +53,16 @@ public class EditAppointmentController implements Initializable {
     private DatePicker startDatePicker;
 
     @FXML
-    private TextField startTimeField;
+    private ComboBox<String> startHour;
 
     @FXML
-    private TextField endTimeField;
+    private ComboBox<String> endHour;
+
+    @FXML
+    private ComboBox<String> startMinute;
+
+    @FXML
+    private ComboBox<String> endMinute;
 
     @FXML
     private DatePicker endDatePicker;
@@ -72,6 +91,7 @@ public class EditAppointmentController implements Initializable {
 
     @FXML
     public void save() {
+
         try {
             Main.getDb().startTransaction();
             if (isAddContext) {
@@ -104,10 +124,17 @@ public class EditAppointmentController implements Initializable {
             userId,
             titleField.getText(),
             typeField.getText(),
-            LocalDateTime.of(startDatePicker.getValue(), LocalTime.parse(startTimeField.getText())),
-            LocalDateTime.of(endDatePicker.getValue(), LocalTime.parse(endTimeField.getText())),
+            LocalDateTime.of(
+                startDatePicker.getValue(),
+                parseHourMinute(startHour.getValue(), startMinute.getValue())),
+            LocalDateTime.of(endDatePicker.getValue(),
+                parseHourMinute(endHour.getValue(), endMinute.getValue())),
             Main.getLoggedInUser()
         );
+    }
+
+    private LocalTime parseHourMinute(String hour, String minute) {
+        return LocalTime.of(Integer.parseInt(hour), Integer.parseInt(minute));
     }
 
     private void update() throws Exception {
@@ -123,13 +150,16 @@ public class EditAppointmentController implements Initializable {
     }
 
     private boolean validateStartBeforeEnd() {
-        if (isValidTime(startTimeField.getText()) && isValidTime(endTimeField.getText())) {
-            LocalTime endTime = LocalTime.parse(endTimeField.getText());
-            LocalTime startTime = LocalTime.parse(startTimeField.getText());
+        if (endHour.getValue() != null && endMinute.getValue() != null && startHour.getValue() != null && startMinute.getValue() != null) {
+            LocalTime endTime = parseHourMinute(endHour.getValue(), endMinute.getValue());
+            LocalTime startTime = parseHourMinute(startHour.getValue(), startMinute.getValue());
             LocalDate startDate = startDatePicker.getValue();
             LocalDate endDate = endDatePicker.getValue();
             if (LocalDateTime.of(startDate, startTime).isAfter(LocalDateTime.of(endDate, endTime))) {
                 timeLabel.setText("Start must be before end date/time");
+                return false;
+            } else if (!withinBusinessHours(startTime, endTime)) {
+                timeLabel.setText("Start and end must be within 09:00 to 15:00");
                 return false;
             } else {
                 timeLabel.setText("");
@@ -140,25 +170,28 @@ public class EditAppointmentController implements Initializable {
         return false;
     }
 
-    private boolean isValidTime(String s) {
-        boolean isProperFormat = s.matches("^(\\d\\d:\\d\\d:\\d\\d)$");
-        if (!isProperFormat) {
-            return false;
-        }
-        try {
-            LocalTime.parse(s);
-        } catch (DateTimeParseException e) {
-            return false;
-        }
-        return true;
+    private boolean withinBusinessHours(LocalTime start, LocalTime end) {
+        LocalTime nine = LocalTime.of(8, 59);
+        LocalTime five = LocalTime.of(17, 1);
+        return start.isAfter(nine) && end.isBefore(five);
     }
 
-    private void validateAndSetMessage(TextField field, Label label) {
-        String value = field.getText();
-        if (value.isEmpty()) {
+//    private boolean isValidTime(String s) {
+//        boolean isProperFormat = s.matches("^(\\d\\d:\\d\\d:\\d\\d)$");
+//        if (!isProperFormat) {
+//            return false;
+//        }
+//        try {
+//            LocalTime.parse(s);
+//        } catch (DateTimeParseException e) {
+//            return false;
+//        }
+//        return true;
+//    }
+
+    private void validateAndSetMessage(ComboBox<String> hour, ComboBox<String> minute, Label label) {
+        if (hour.getSelectionModel().getSelectedItem() == null || minute.getSelectionModel().getSelectedItem() == null) {
             label.setText("Required");
-        } else if (!isValidTime(value)) {
-            label.setText("Invalid Time");
         } else {
             label.setText("");
         }
@@ -169,8 +202,8 @@ public class EditAppointmentController implements Initializable {
         boolean userSelected = userDropdown.getSelectionModel().getSelectedItem() != null;
         boolean typeFilled = validateType();
         boolean titleFilled = validateTitle();
-        validateAndSetMessage(startTimeField, startTimeLabel);
-        validateAndSetMessage(endTimeField, endTimeLabel);
+        validateAndSetMessage(startHour, startMinute, startTimeLabel);
+        validateAndSetMessage(endHour, endMinute, endTimeLabel);
         return customerSelected && userSelected && validateStartBeforeEnd() && typeFilled && titleFilled;
     }
 
@@ -199,6 +232,11 @@ public class EditAppointmentController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        startHour.setItems(hours);
+        endHour.setItems(hours);
+        startMinute.setItems(minutes);
+        endMinute.setItems(minutes);
+
         customerDropdown.setButtonCell(new ListCell<Customer>() {
             @Override
             protected void updateItem(Customer item, boolean empty) {
@@ -255,12 +293,34 @@ public class EditAppointmentController implements Initializable {
 
             startDatePicker.setValue(selected.getStart().toLocalDate());
             endDatePicker.setValue(selected.getEnd().toLocalDate());
-            startTimeField.setText(selected.getStart().toLocalTime().format(DateTimeFormatter.ISO_LOCAL_TIME));
-            endTimeField.setText(selected.getEnd().toLocalTime().format(DateTimeFormatter.ISO_LOCAL_TIME));
+
+            LocalTime selectedStart = selected.getStart().toLocalTime();
+            LocalTime selectedEnd = selected.getEnd().toLocalTime();
+            String startMin = getNearestQuarterHour(selectedStart.getMinute());
+            String endMin = getNearestQuarterHour(selectedEnd.getMinute());
+
+            startHour.getSelectionModel().select(selectedStart.getHour());
+            startMinute.getSelectionModel().select(startMin);
+            endHour.getSelectionModel().select(selectedEnd.getHour());
+            endMinute.getSelectionModel().select(endMin);
         } else {
             customerDropdown.getSelectionModel().selectFirst();
             userDropdown.getSelectionModel().selectFirst();
         }
         checkAllFields();
+    }
+
+    public String getNearestQuarterHour(int minute) {
+        if (minute >= 0 && minute <= 7) {
+            return "00";
+        } else if (minute > 7 && minute <= 22) {
+            return "15";
+        } else if (minute > 22 && minute <= 37) {
+            return "30";
+        } else if (minute > 37 && minute <= 52) {
+            return "45";
+        } else {
+            return "00";
+        }
     }
 }

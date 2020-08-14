@@ -1,2 +1,4 @@
 out/
 *.properties
+*.log
+javafx-app.log
