@@ -268,7 +268,9 @@ public class EditAppointmentController implements Initializable {
         endHour.setItems(hours);
         startMinute.setItems(minutes);
         endMinute.setItems(minutes);
-
+        // Lambda example: Passing in a lambda callback which results in a new DateCell
+        // allowing only dates from today and future.
+        // Used to disallow creation of appointments on past days.
         startDatePicker.setDayCellFactory(param -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {

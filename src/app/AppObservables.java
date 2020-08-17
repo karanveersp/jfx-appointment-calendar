@@ -75,6 +75,8 @@ public class AppObservables {
     }
 
     public Customer getCustomerById(long id) {
+        // Lambda example: Predicate to match the given id
+        // to filter the matching customer.
         return customers.stream()
             .filter(c -> c.getCustomerId() == id)
             .findFirst().orElseThrow(null);
