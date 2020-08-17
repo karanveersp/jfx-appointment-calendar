@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="mainBorderPane" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.MainController">
+<BorderPane fx:id="mainBorderPane" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.MainController">
    <center>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
@@ -17,6 +17,8 @@
                   <Button mnemonicParsing="false" onAction="#toAppointments" text="Appointments" />
                   <Button mnemonicParsing="false" onAction="#toCustomers" text="Customers" />
                       <Button mnemonicParsing="false" onAction="#logoutUser" prefHeight="26.0" prefWidth="89.0" text="Logout" />
+                  <Button mnemonicParsing="false" onAction="#toCalendar" text="Calendar" />
+                  <Button mnemonicParsing="false" onAction="#toReports" text="Reports" />
                </children>
             </VBox>
          </children>

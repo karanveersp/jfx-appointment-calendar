@@ -4,8 +4,6 @@ import app.Util;
 import app.db.BaseDao;
 import app.db.Database;
 import app.model.Appointment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AppointmentDao extends BaseDao<Appointment> {
-    private static final Logger logger = LoggerFactory.getLogger(AppointmentDao.class);
 
     public AppointmentDao(Database db, String tableName, String idColName) {
         super(db, tableName, idColName);
@@ -56,12 +53,11 @@ public class AppointmentDao extends BaseDao<Appointment> {
         String updateSql = String.format("UPDATE %s SET %s WHERE %s = %d",
             tableName, colVals, idColName, updated.getAppointmentId());
 
-        logger.debug("Update appointment sql: " + updateSql);
         try {
             int i = db.update(updateSql);
             return i == 1;
         } catch (SQLException e) {
-            logger.error("While updating appointment", e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -91,7 +87,7 @@ public class AppointmentDao extends BaseDao<Appointment> {
             int i = db.update(sql);
             return i != 0;
         } catch (SQLException e) {
-            logger.error("While deleting appointment by customer id: {}", customerId, e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -103,11 +99,10 @@ public class AppointmentDao extends BaseDao<Appointment> {
             String sql = String.format("INSERT INTO %s VALUES (%s)",
                 tableName, insertValuesString(addition)
             );
-            logger.debug("Inserting appointment SQL: {}", sql);
             db.update(sql);
             return addition;
         } catch (SQLException e) {
-            logger.error("While inserting appointment", e);
+            e.printStackTrace();
         }
         return null;
     }

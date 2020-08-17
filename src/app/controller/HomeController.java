@@ -2,7 +2,6 @@ package app.controller;
 
 import app.Main;
 import app.Util;
-import app.model.Appointment;
 import app.model.Customer;
 import app.model.User;
 import javafx.fxml.FXML;
@@ -11,7 +10,6 @@ import javafx.scene.control.Label;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -21,7 +19,7 @@ public class HomeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        welcomeLabel.setText("Welcome " + Main.getLoggedInUser());
+        welcomeLabel.setText("Welcome " + Main.getLoggedInUserName());
         // Show an alert if appointment in next 15 minutes.
         String appointmentsWithin15Mins = Main.getObservables().getAppointments().stream().filter(
             appt -> {

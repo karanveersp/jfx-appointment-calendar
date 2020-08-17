@@ -11,19 +11,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class EditAppointmentController implements Initializable {
-    private static final Logger logger = LoggerFactory.getLogger(EditAppointmentController.class);
 
     public static Appointment selected;
     public static Stage self;
@@ -91,7 +89,11 @@ public class EditAppointmentController implements Initializable {
 
     @FXML
     public void save() {
-
+        if (isOverlapping()) {
+            Util.showInfoAlert("Overlapping appointment!",
+                "Please choose a different time \nfor meeting with: " + userDropdown.getValue().getUserName());
+            return;
+        }
         try {
             Main.getDb().startTransaction();
             if (isAddContext) {
@@ -101,13 +103,13 @@ public class EditAppointmentController implements Initializable {
             }
         } catch (Exception e) {
             Util.showInfoAlert("An error occurred", e.getMessage());
-            logger.error(e.getMessage(), e);
+            e.printStackTrace();
             Main.getDb().rollback();
             return;
         }
         Main.getDb().commit();
         Main.getObservables().refreshAll(Main.getDaos());
-        logger.debug("Completed saving appointment");
+        System.out.println("Completed saving appointment");
         self.close();
     }
 
@@ -129,7 +131,7 @@ public class EditAppointmentController implements Initializable {
                 parseHourMinute(startHour.getValue(), startMinute.getValue())),
             LocalDateTime.of(endDatePicker.getValue(),
                 parseHourMinute(endHour.getValue(), endMinute.getValue())),
-            Main.getLoggedInUser()
+            Main.getLoggedInUserName()
         );
     }
 
@@ -155,6 +157,10 @@ public class EditAppointmentController implements Initializable {
             LocalTime startTime = parseHourMinute(startHour.getValue(), startMinute.getValue());
             LocalDate startDate = startDatePicker.getValue();
             LocalDate endDate = endDatePicker.getValue();
+            if (startDate == null || endDate == null) {
+                timeLabel.setText("Please select dates");
+                return false;
+            }
             if (LocalDateTime.of(startDate, startTime).isAfter(LocalDateTime.of(endDate, endTime))) {
                 timeLabel.setText("Start must be before end date/time");
                 return false;
@@ -174,6 +180,32 @@ public class EditAppointmentController implements Initializable {
         LocalTime nine = LocalTime.of(8, 59);
         LocalTime five = LocalTime.of(17, 1);
         return start.isAfter(nine) && end.isBefore(five);
+    }
+
+    private boolean areOverlappingPeriods(LocalDateTime s1, LocalDateTime s2, LocalDateTime e1, LocalDateTime e2) {
+        return
+            (s2.isAfter(s1) && s2.isBefore(e1)) ||  // s2 between s1, e1
+            (e2.isAfter(s1) && e2.isBefore(e1)) ||  // e2 between s1, e1
+            (s1.isAfter(s2) && s1.isBefore(e2)) ||  // s1 between s2, e2
+            (e1.isAfter(s2) && e1.isBefore(e2));    // e1 between s2, e2
+    }
+
+    private boolean isOverlapping() {
+        LocalDateTime start = LocalDateTime.of(
+            startDatePicker.getValue(),
+            parseHourMinute(startHour.getValue(), startMinute.getValue()));
+        LocalDateTime end = LocalDateTime.of(endDatePicker.getValue(),
+                parseHourMinute(endHour.getValue(), endMinute.getValue()));
+        User user = userDropdown.getSelectionModel().getSelectedItem();
+        List<Appointment> allApptsForUser = Main.getObservables().getAppointments().stream()
+            .filter(appt -> appt.getUserId() == user.getUserId())
+            .collect(Collectors.toList());
+        for (Appointment appt : allApptsForUser) {
+            if (areOverlappingPeriods(start, appt.getStart(), end, appt.getEnd())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 //    private boolean isValidTime(String s) {
@@ -237,6 +269,21 @@ public class EditAppointmentController implements Initializable {
         startMinute.setItems(minutes);
         endMinute.setItems(minutes);
 
+        startDatePicker.setDayCellFactory(param -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.compareTo(LocalDate.now()) < 0);
+            }
+        });
+        endDatePicker.setDayCellFactory(param -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.compareTo(LocalDate.now()) < 0);
+            }
+        });
+
         customerDropdown.setButtonCell(new ListCell<Customer>() {
             @Override
             protected void updateItem(Customer item, boolean empty) {
@@ -286,9 +333,9 @@ public class EditAppointmentController implements Initializable {
         if (!isAddContext) {
             typeField.setText(selected.getType());
             titleField.setText(selected.getTitle());
-            Customer existingCustomer = customerDropdown.getItems().stream().filter(c -> c.getCustomerId() == selected.getCustomerId()).findFirst().orElseThrow(null);
+            Customer existingCustomer = Main.getObservables().getCustomerById(selected.getCustomerId());
             customerDropdown.getSelectionModel().select(existingCustomer);
-            User existingUser = userDropdown.getItems().stream().filter(u -> u.getUserId() == selected.getUserId()).findFirst().orElseThrow(null);
+            User existingUser = Main.getObservables().getUserById(selected.getUserId());
             userDropdown.getSelectionModel().select(existingUser);
 
             startDatePicker.setValue(selected.getStart().toLocalDate());

@@ -5,9 +5,6 @@ import app.db.Dao;
 import app.db.Database;
 import app.model.User;
 import app.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -15,7 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UserDao extends BaseDao<User> implements Dao<User> {
-    private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
 
     public UserDao(Database db, String tableName, String idColName) {
         super(db, tableName, idColName);
@@ -25,18 +21,6 @@ public class UserDao extends BaseDao<User> implements Dao<User> {
         return new UserDao(db, "user", "userId");
     }
 
-    public boolean authenticate(String userName, String password) {
-        String sql = String.format("SELECT * FROM %s WHERE userName='%s' AND password='%s'",
-            tableName, userName, password);
-        try {
-            ResultSet rs = db.getConnection().createStatement().executeQuery(sql);
-            return rs.next();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return false;
-    }
-
     @Override
     public boolean update(User updated) {
         String colVals = updateValuesString(updated);
@@ -44,12 +28,11 @@ public class UserDao extends BaseDao<User> implements Dao<User> {
         String updateSql = String.format("UPDATE %s SET (%s) WHERE %s = %d",
             tableName, colVals, idColName, updated.getUserId());
 
-        logger.debug("Update user sql: " + updateSql);
         try {
             int i = db.update(updateSql);
             return i == 1;
         } catch (SQLException e) {
-            logger.error("While updating user", e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -61,11 +44,10 @@ public class UserDao extends BaseDao<User> implements Dao<User> {
             String sql = String.format("INSERT INTO %s VALUES (%s)",
                 tableName, insertValuesString(addition)
             );
-            logger.debug("Insert user sql : " + sql);
             db.update(sql);
             return addition;
         } catch (SQLException e) {
-            logger.error("While inserting user", e);
+            e.printStackTrace();
         }
         return null;
     }

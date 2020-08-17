@@ -17,15 +17,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class CustomerController implements Initializable {
-    private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
     @FXML
     private TableView<Customer> customerTable;
@@ -36,7 +33,7 @@ public class CustomerController implements Initializable {
             EditCustomerController.self = stage;
             stage.showAndWait();
         } catch (IOException e) {
-            logger.error("While showing edit customer window", e);
+            e.printStackTrace();
         }
     }
 

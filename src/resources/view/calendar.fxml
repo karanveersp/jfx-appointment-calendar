@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="500.0" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.CalendarController">
+   <children>
+      <RadioButton fx:id="weeklyRadio" layoutX="142.0" layoutY="466.0" mnemonicParsing="false" selected="true" text="Weekly" AnchorPane.bottomAnchor="115.0" AnchorPane.leftAnchor="155.0">
+         <toggleGroup>
+            <ToggleGroup fx:id="calendarType" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="monthlyRadio" layoutX="255.0" layoutY="466.0" mnemonicParsing="false" text="Monthly" toggleGroup="$calendarType" AnchorPane.bottomAnchor="115.0" AnchorPane.leftAnchor="255.0" />
+      <Label fx:id="headerLabel" layoutX="91.0" layoutY="32.0" AnchorPane.leftAnchor="90.0" AnchorPane.topAnchor="30.0" />
+      <Button fx:id="prevBtn" layoutX="36.0" layoutY="441.0" mnemonicParsing="false" onAction="#onPrev" text="Prev" AnchorPane.bottomAnchor="133.0" AnchorPane.leftAnchor="60.0" />
+      <Button fx:id="nextBtn" layoutX="413.0" layoutY="441.0" mnemonicParsing="false" onAction="#onNext" text="Next" AnchorPane.bottomAnchor="133.0" AnchorPane.rightAnchor="50.0" />
+      <ListView fx:id="monthlyListView" layoutX="47.0" layoutY="70.0" prefHeight="361.0" prefWidth="413.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="70.0" />
+      <TreeView fx:id="weeklyTreeView" layoutX="50.0" layoutY="70.0" prefHeight="361.0" prefWidth="410.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="70.0" />
+   </children>
+</AnchorPane>

@@ -7,8 +7,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class EditCustomerController implements Initializable {
-    private static final Logger logger = LoggerFactory.getLogger(EditCustomerController.class);
 
     public static CustomerWithAddress selectedCustomer;
     public static Stage self;
@@ -48,7 +45,7 @@ public class EditCustomerController implements Initializable {
     @FXML
     public void saveCustomer() {
         if (!isInputValid()) {
-            Util.showInfoAlert("Form invalid", "All fields are required");
+            Util.showInfoAlert("Form invalid", "All fields except Address 2 are required");
             return;
         }
         try {
@@ -60,19 +57,19 @@ public class EditCustomerController implements Initializable {
             }
         } catch (Exception e) {
             Util.showInfoAlert("An error occurred", e.getMessage());
-            logger.error(e.getMessage(), e);
+            e.printStackTrace();
             Main.getDb().rollback();
             return;
         }
         Main.getDb().commit();
         Main.getObservables().refreshAll(Main.getDaos());
-        logger.debug("Completed saving customer");
+        System.out.println("Completed saving customer");
         self.close();
     }
 
     private void addCustomer() {
-        Country country = Main.getDaos().getCountryDao().findExistingOrCreate(countryField.getText(), Main.getLoggedInUser());
-        City city = Main.getDaos().getCityDao().findExistingOrCreate(cityField.getText(), country.getCountryId(), Main.getLoggedInUser());
+        Country country = Main.getDaos().getCountryDao().findExistingOrCreate(countryField.getText(), Main.getLoggedInUserName());
+        City city = Main.getDaos().getCityDao().findExistingOrCreate(cityField.getText(), country.getCountryId(), Main.getLoggedInUserName());
         // For address, we create an address object, and depending on add/edit context
         // set certain fields from existing address
 
@@ -82,19 +79,19 @@ public class EditCustomerController implements Initializable {
             city.getCityId(),
             zipField.getText(),
             phoneField.getText(),
-            Main.getLoggedInUser()
+            Main.getLoggedInUserName()
         );
         address = Main.getDaos().getAddressDao().insert(address);
-        Customer customer = new Customer(nameField.getText(), address.getAddressId(), Main.getLoggedInUser());
+        Customer customer = new Customer(nameField.getText(), address.getAddressId(), Main.getLoggedInUserName());
         Main.getDaos().getCustomerDao().insert(customer);
     }
 
     private void updateCustomer() throws Exception {
-        Country country = Main.getDaos().getCountryDao().findExistingOrCreate(countryField.getText(), Main.getLoggedInUser());
-        City city = Main.getDaos().getCityDao().findExistingOrCreate(cityField.getText(), country.getCountryId(), Main.getLoggedInUser());
+        Country country = Main.getDaos().getCountryDao().findExistingOrCreate(countryField.getText(), Main.getLoggedInUserName());
+        City city = Main.getDaos().getCityDao().findExistingOrCreate(cityField.getText(), country.getCountryId(), Main.getLoggedInUserName());
         if (city.getCountryId() != country.getCountryId()) {
             // Create a duplicate named city in updated country
-            city = Main.getDaos().getCityDao().insert(new City(city.getCity(), country.getCountryId(), Main.getLoggedInUser()));
+            city = Main.getDaos().getCityDao().insert(new City(city.getCity(), country.getCountryId(), Main.getLoggedInUserName()));
         }
         Address address = new Address(
             addressField.getText(),
@@ -102,7 +99,7 @@ public class EditCustomerController implements Initializable {
             city.getCityId(),
             zipField.getText(),
             phoneField.getText(),
-            Main.getLoggedInUser()
+            Main.getLoggedInUserName()
         );
         // update address
         Address existing = selectedCustomer.getAddress();
@@ -115,7 +112,7 @@ public class EditCustomerController implements Initializable {
             throw new Exception("Error while updating address");
         }
 
-        Customer customer = new Customer(nameField.getText(), address.getAddressId(), Main.getLoggedInUser());
+        Customer customer = new Customer(nameField.getText(), address.getAddressId(), Main.getLoggedInUserName());
         // update customer
         Customer existingCustomer = selectedCustomer.getCustomer();
         // reset some fields

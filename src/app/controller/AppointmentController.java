@@ -16,8 +16,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,7 +25,6 @@ import java.time.format.FormatStyle;
 import java.util.ResourceBundle;
 
 public class AppointmentController implements Initializable {
-    private static final Logger logger = LoggerFactory.getLogger(AppointmentController.class);
 
     @FXML
     private TableView<Appointment> appointmentTable;
@@ -38,7 +35,7 @@ public class AppointmentController implements Initializable {
             EditAppointmentController.self = stage;
             stage.showAndWait();
         } catch (IOException e) {
-            logger.error("While showing edit appointment window", e);
+            e.printStackTrace();
         }
     }
 
@@ -165,6 +162,6 @@ public class AppointmentController implements Initializable {
         appointmentTable.setItems(Main.getObservables().getAppointments());
         appointmentTable.setEditable(false);
         appointmentTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        logger.debug("Initialized appointments");
+        System.out.println("Initialized appointments");
     }
 }

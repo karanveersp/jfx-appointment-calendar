@@ -5,8 +5,6 @@ import app.db.BaseDao;
 import app.db.Dao;
 import app.db.Database;
 import app.model.City;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CityDao extends BaseDao<City> implements Dao<City> {
-    private static final Logger logger = LoggerFactory.getLogger(CityDao.class);
 
     public CityDao(Database db, String tableName, String idColName) {
         super(db, tableName, idColName);
@@ -48,12 +45,11 @@ public class CityDao extends BaseDao<City> implements Dao<City> {
         );
         String updateSql = String.format("UPDATE %s SET (%s) WHERE %s = %d",
             tableName, colVals, idColName, updated.getCityId());
-        logger.debug("Update city sql: {}", updateSql);
         try {
             int i = db.update(updateSql);
             return i == 1;
         } catch (SQLException e) {
-            logger.error("While updating city", e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -76,11 +72,10 @@ public class CityDao extends BaseDao<City> implements Dao<City> {
             addition.setCityId(Util.getNextAvailableId(db, idColName, tableName));
             String sql = String.format("INSERT INTO %s VALUES (%s)",
                 tableName, insertValuesString(addition));
-            logger.debug("Inserting city SQL: {}", sql);
             db.update(sql);
             return addition;
         } catch (SQLException e) {
-            logger.error("While inserting city", e);
+            e.printStackTrace();
         }
         return null;
     }
@@ -93,7 +88,7 @@ public class CityDao extends BaseDao<City> implements Dao<City> {
                 return Optional.of(parseResult(rs));
             }
         } catch (SQLException throwables) {
-            logger.error("While checking for existing city", throwables);
+            throwables.printStackTrace();
         }
         return Optional.empty();
     }

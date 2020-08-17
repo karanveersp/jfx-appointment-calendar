@@ -2,6 +2,7 @@ package app;
 
 import app.db.Database;
 import app.db.UseDb;
+import app.model.User;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -10,23 +11,20 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class Util {
-    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
     public static Properties loadDBProps() throws IOException {
         InputStream is = UseDb.class.getResourceAsStream("/app.properties");
@@ -76,7 +74,7 @@ public class Util {
             parent = FXMLLoader.load(Util.class.getResource(viewPath));
             return parent;
         } catch (IOException ex) {
-            logger.error("While loading fxml " + view.getName(), ex);
+            ex.printStackTrace();
             throw ex;
         }
     }
@@ -96,6 +94,10 @@ public class Util {
         alert.showAndWait();
     }
 
+    public static String getFormattedDate(LocalDate date) {
+        return date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
+    }
+
     public static long getNextAvailableId(Database db, String idColName, String tableName) throws SQLException {
         PreparedStatement stat;
         ResultSet rs;
@@ -107,5 +109,55 @@ public class Util {
             result = rs.getInt("max_id") + 1;
         }
         return result;
+    }
+
+    public static void saveText(File file, String text) {
+        try {
+            PrintWriter writer= new PrintWriter(file);
+            writer.println(text);
+            writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String formatStartTimeWithDuration(LocalDateTime start, LocalDateTime end, boolean withDate) {
+        String date = start.toLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
+        if (withDate) {
+            return date + " - At " + start.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " for " + getDuration(start, end);
+        }
+        return "At " + start.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " for " + getDuration(start, end);
+    }
+
+    public static String getDuration(LocalDateTime start, LocalDateTime end) {
+        Duration dur = Duration.between(start, end);
+        long millis = dur.toMillis();
+        return String.format("%02dH %02dM",
+            TimeUnit.MILLISECONDS.toHours(millis),
+            TimeUnit.MILLISECONDS.toMinutes(millis) -
+                TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis))
+        );
+    }
+
+    public static void logSignIn() {
+        try {
+            FileWriter writer = new FileWriter("app.log", true);
+            String now = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+            writer.append(String.format("%s : %s logged in\n", now, Main.getLoggedInUserName()));
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void logSignOut() {
+        try {
+            FileWriter writer = new FileWriter("app.log", true);
+            String now = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+            writer.append(String.format("%s : %s logged out\n", now, Main.getLoggedInUserName()));
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -5,7 +5,8 @@ public enum View {
     APPOINTMENTS("appointments.fxml"),
     EDIT_CUSTOMER("editCustomer.fxml"),
     EDIT_APPOINTMENT("editAppointment.fxml"),
-    EDIT_ADDRESS("editAddress.fxml"),
+    REPORTS("reports.fxml"),
+    CALENDAR("calendar.fxml"),
     MAIN("main.fxml"),
     LOGIN("login.fxml"),
     HOME("home.fxml");

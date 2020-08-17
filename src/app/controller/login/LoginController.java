@@ -1,8 +1,9 @@
 package app.controller.login;
 
 import app.Main;
+import app.Util;
 import app.View;
-import app.dao.UserDao;
+import app.model.User;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -12,6 +13,7 @@ import javafx.scene.control.TextField;
 
 import java.net.URL;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
@@ -29,8 +31,10 @@ public class LoginController implements Initializable {
 
     @FXML
     private void loginUser() {
-        if (isValidCredentials(usernameField.getText(), passwordField.getText())) {
-            Main.setLoggedInUser(usernameField.getText());
+        Optional<User> found = findUser(usernameField.getText(), passwordField.getText());
+        if (found.isPresent()) {
+            Main.setLoggedInUser(found.get());
+            Util.logSignIn();
             Main.getViewSetter().set(View.HOME);
             System.out.println("User's credentials are valid");
             return;
@@ -42,9 +46,10 @@ public class LoginController implements Initializable {
         alert.showAndWait();
     }
 
-    private boolean isValidCredentials(String username, String password) {
-        UserDao userDao = UserDao.getInstance(Main.getDb());
-        return userDao.authenticate(username, password);
+    private Optional<User> findUser(String username, String password) {
+       return Main.getObservables().getUsers().stream()
+           .filter(u -> u.getUserName().equals(username) && u.getPassword().equals(password))
+           .findFirst();
     }
 
     @Override

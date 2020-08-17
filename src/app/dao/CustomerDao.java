@@ -1,21 +1,17 @@
 package app.dao;
 
+import app.Util;
 import app.db.BaseDao;
 import app.db.Dao;
 import app.db.Database;
 import app.model.Customer;
-import app.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CustomerDao extends BaseDao<Customer> implements Dao<Customer> {
-    private static final Logger logger = LoggerFactory.getLogger(CustomerDao.class);
 
     public CustomerDao(Database db, String tableName, String idColName) {
         super(db, tableName, idColName);
@@ -47,7 +43,7 @@ public class CustomerDao extends BaseDao<Customer> implements Dao<Customer> {
             int i = db.update(updateSql);
             return i == 1;
         } catch (SQLException e) {
-            logger.error("While updating customer", e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -83,7 +79,7 @@ public class CustomerDao extends BaseDao<Customer> implements Dao<Customer> {
             db.update(sql);
             return addition;
         } catch (SQLException e) {
-            logger.error("While inserting customer", e);
+            e.printStackTrace();
         }
         return null;
     }

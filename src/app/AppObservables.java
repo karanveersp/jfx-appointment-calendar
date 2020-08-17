@@ -9,7 +9,9 @@ import app.model.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AppObservables {
     private final ObservableList<Customer> customers;
@@ -44,6 +46,12 @@ public class AppObservables {
         return appointments;
     }
 
+    public List<Appointment> getSortedAppointments() {
+        return appointments.stream()
+            .sorted(Comparator.comparing(Appointment::getStart))
+            .collect(Collectors.toList());
+    }
+
     public ObservableList<Country> getCountries() {
         return countries;
     }
@@ -66,8 +74,20 @@ public class AppObservables {
         users.setAll(daos.getUserDao().getAll());
     }
 
+    public Customer getCustomerById(long id) {
+        return customers.stream()
+            .filter(c -> c.getCustomerId() == id)
+            .findFirst().orElseThrow(null);
+    }
 
-    public static AppObservables initializeFromDaos(AppDaos daos) {
+    public User getUserById(long id) {
+        return users.stream()
+            .filter(u -> u.getUserId() == id)
+            .findFirst().orElseThrow(null);
+    }
+
+
+        public static AppObservables initializeFromDaos(AppDaos daos) {
         List<Customer> customerSet = daos.getCustomerDao().getAll();
         List<City> citySet = daos.getCityDao().getAll();
         List<Address> addressSet = daos.getAddressDao().getAll();

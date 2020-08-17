@@ -4,8 +4,6 @@ import app.Util;
 import app.db.BaseDao;
 import app.db.Database;
 import app.model.Country;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CountryDao extends BaseDao<Country> {
-    private static final Logger logger = LoggerFactory.getLogger(CountryDao.class);
 
     public CountryDao(Database db, String tableName, String idColName) {
         super(db, tableName, idColName);
@@ -44,7 +41,7 @@ public class CountryDao extends BaseDao<Country> {
                 return Optional.of(parseResult(rs));
             }
         } catch (SQLException throwables) {
-            logger.error("While checking for existing country", throwables);
+            throwables.printStackTrace();
         }
         return Optional.empty();
     }
@@ -57,12 +54,11 @@ public class CountryDao extends BaseDao<Country> {
             "lastUpdateBy=" + Util.withSingleQuotes(updated.getLastUpdateBy()));
         String updateSql = String.format("UPDATE %s SET (%s) WHERE %s = %d",
             tableName, colVals, idColName, updated.getCountryId());
-        logger.debug("Update country SQL: {}", updateSql);
         try {
             int i = db.update(updateSql);
             return i == 1;
         } catch (SQLException e) {
-            logger.error("While updating country", e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -91,7 +87,7 @@ public class CountryDao extends BaseDao<Country> {
             db.update(sql);
             return addition;
         } catch (SQLException e) {
-            logger.error("While inserting country", e);
+            e.printStackTrace();
         }
         return null;
     }

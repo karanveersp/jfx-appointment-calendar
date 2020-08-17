@@ -1,39 +1,37 @@
 package app;
 
 import app.db.Database;
+import app.model.User;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.IOException;
 import java.util.Properties;
 
 public class Main extends Application  {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
-
     // Data fields
     private static Stage stage = null;
     private static ViewSettable controller;
     private static AppObservables observables;
     private static AppDaos daos;
-    private static String userName;
+    private static User loggedInUser;
     private static Database db;
 
     public static boolean isLoggedIn() {
-        return userName != null && !userName.isEmpty();
+        return loggedInUser != null;
     }
 
-    public static String getLoggedInUser() {
-        return userName;
+    public static String getLoggedInUserName() {
+        return loggedInUser.getUserName();
     }
 
-    public static void setLoggedInUser(String user) {
-        userName = user;
+    public static void setLoggedInUser(User user) {
+        loggedInUser = user;
     }
 
     public static Stage getStage() {
@@ -67,7 +65,7 @@ public class Main extends Application  {
             daos = new AppDaos(db);
             observables = AppObservables.initializeFromDaos(daos);
         } catch (IOException e) {
-            logger.error("While initializing database or observables", e);
+            e.printStackTrace();
         }
     }
 
