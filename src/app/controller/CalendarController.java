@@ -157,8 +157,10 @@ public class CalendarController implements Initializable {
     private TreeItem<String> appointmentAsTreeItem(Appointment appt) {
         String customer = Main.getObservables().getCustomerById(appt.getCustomerId()).getCustomerName();
         String user  = Main.getObservables().getUserById(appt.getUserId()).getUserName();
-        String duration = Util.formatStartTimeWithDuration(appt.getStart(), appt.getEnd(), false);
-        String asStr = String.format("%s - %s meeting with %s", duration, customer, user);
+//        String duration = Util.formatStartTimeWithDuration(appt.getStart(), appt.getEnd(), false);
+        String startTime = appt.getStart().toLocalTime().format(DateTimeFormatter.ISO_LOCAL_TIME);
+        String endTime = appt.getEnd().toLocalTime().format(DateTimeFormatter.ISO_LOCAL_TIME);
+        String asStr = String.format("%s to %s - %s meeting with %s", startTime, endTime, customer, user);
         return new TreeItem<>(asStr);
     }
 

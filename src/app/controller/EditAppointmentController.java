@@ -185,9 +185,11 @@ public class EditAppointmentController implements Initializable {
     private boolean areOverlappingPeriods(LocalDateTime s1, LocalDateTime s2, LocalDateTime e1, LocalDateTime e2) {
         return
             (s2.isAfter(s1) && s2.isBefore(e1)) ||  // s2 between s1, e1
-            (e2.isAfter(s1) && e2.isBefore(e1)) ||  // e2 between s1, e1
-            (s1.isAfter(s2) && s1.isBefore(e2)) ||  // s1 between s2, e2
-            (e1.isAfter(s2) && e1.isBefore(e2));    // e1 between s2, e2
+                (e2.isAfter(s1) && e2.isBefore(e1)) ||  // e2 between s1, e1
+                (s1.isAfter(s2) && s1.isBefore(e2)) ||  // s1 between s2, e2
+                (e1.isAfter(s2) && e1.isBefore(e2)) ||  // e1 between s2, e2
+                (s1.equals(s2)) || // s1 == s2
+                (e1.equals(e2));  // e1 == e2
     }
 
     private boolean isOverlapping() {
@@ -195,7 +197,7 @@ public class EditAppointmentController implements Initializable {
             startDatePicker.getValue(),
             parseHourMinute(startHour.getValue(), startMinute.getValue()));
         LocalDateTime end = LocalDateTime.of(endDatePicker.getValue(),
-                parseHourMinute(endHour.getValue(), endMinute.getValue()));
+            parseHourMinute(endHour.getValue(), endMinute.getValue()));
         User user = userDropdown.getSelectionModel().getSelectedItem();
         List<Appointment> allApptsForUser = Main.getObservables().getAppointments().stream()
             .filter(appt -> appt.getUserId() == user.getUserId())

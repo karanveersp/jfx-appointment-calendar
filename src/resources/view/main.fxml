@@ -16,11 +16,11 @@
                <children>
                   <Button mnemonicParsing="false" onAction="#toAppointments" text="Appointments" />
                   <Button mnemonicParsing="false" onAction="#toCustomers" text="Customers" />
-                      <Button mnemonicParsing="false" onAction="#logoutUser" prefHeight="26.0" prefWidth="89.0" text="Logout" />
                   <Button mnemonicParsing="false" onAction="#toCalendar" text="Calendar" />
                   <Button mnemonicParsing="false" onAction="#toReports" text="Reports" />
                </children>
             </VBox>
+                <Button layoutX="59.0" layoutY="508.0" mnemonicParsing="false" onAction="#logoutUser" prefHeight="26.0" prefWidth="89.0" text="Logout" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="50.0" />
          </children>
       </AnchorPane>
    </left>
